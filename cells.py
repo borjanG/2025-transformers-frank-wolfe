@@ -13,8 +13,8 @@ rc("font", size=13)
 np.random.seed(42)
 
 # Generate random points
-# k = 9
-# V = np.random.rand(k, 2) - 0.5  # Center around origin
+k = 36
+V = np.random.rand(k, 2) - 0.5  # Center around origin
 
 # # Generate points on a circle with small radial noise
 # k = 9
@@ -25,17 +25,17 @@ np.random.seed(42)
 from scipy.linalg import fractional_matrix_power
 
 # Settings
-k = 5
-c = 1.0
+# k = 5
+# c = 1.0
 B = np.diag([1, 1])  # example positive definite matrix
-Binv_sqrt = fractional_matrix_power(B, -0.5)  # B^{-1/2}
+# Binv_sqrt = fractional_matrix_power(B, -0.5)  # B^{-1/2}
 
-# Random angles
-theta = np.random.uniform(0, 2 * np.pi, k)
-circle_points = np.c_[np.cos(theta), np.sin(theta)]  # shape (k, 2)
+# # Random angles
+# theta = np.random.uniform(0, 2 * np.pi, k)
+# circle_points = np.c_[np.cos(theta), np.sin(theta)]  # shape (k, 2)
 
-# Map to ellipse level set: x = sqrt(c) * B^{-1/2} * u
-V = np.sqrt(c) * (circle_points @ Binv_sqrt.T)
+# # Map to ellipse level set: x = sqrt(c) * B^{-1/2} * u
+# V = np.sqrt(c) * (circle_points @ Binv_sqrt.T)
 
 
 
@@ -65,15 +65,20 @@ for i, z in enumerate(grid):
         cell_map[i] = np.argmax(scores)
 
 # Plot
+from matplotlib.colors import hsv_to_rgb
 plt.figure(figsize=(8, 8))
-colors = plt.cm.Set3(np.linspace(0, 1, len(K)))
+hues = np.linspace(0, 1, len(K), endpoint=False)  # evenly spaced hues
+saturation = 1.0
+value = 1.0
+colors = hsv_to_rgb(np.stack([hues, np.full(len(K), saturation), np.full(len(K), value)], axis=1))
+#colors = plt.cm.tab10(np.linspace(0, 1, len(K)))
 
 
 for i in range(len(K)):
     mask = (cell_map == i)
     if np.any(mask):
         points = grid[mask]
-        plt.scatter(points[:, 0], points[:, 1], color=colors[i], alpha=0.5, s=1)
+        plt.scatter(points[:, 0], points[:, 1], color=colors[i], s=1)
 
         # Label cell with original index from V
         centroid = points.mean(axis=0)
@@ -103,10 +108,11 @@ for i, v in enumerate(K):
 plt.scatter(0, 0, color='black', marker='x', s=80, linewidths=2)
 plt.text(0.02, 0.02, "$0$", color='black', fontsize=13)
 
-plt.title("Cells in $\mathcal{K}$ where $\\langle x, v_j \\rangle \\geq \\langle x, y \\rangle$ for all $y \\in \mathcal{K}$")
+#plt.title("Cells in $\mathcal{K}$ where $\\langle x, v_j \\rangle \\geq \\langle x, y \\rangle$ for all $y \\in \mathcal{K}$")
 plt.axis('equal')
 plt.axis('off')
 script_dir = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(script_dir, "cells{}.png".format(k))
-plt.savefig(filename, dpi=500)
+#filename = os.path.join(script_dir, "cells{}.png".format(k))
+filename = os.path.join(script_dir, "cells{}.pdf".format(k))
+plt.savefig(filename, bbox_inches='tight', format='pdf')
 plt.show()

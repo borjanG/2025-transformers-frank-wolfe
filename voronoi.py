@@ -4,7 +4,13 @@ from scipy.spatial import Voronoi, ConvexHull
 from shapely.geometry import Polygon as ShapelyPolygon, MultiPolygon
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
+from matplotlib import rc
 import os
+
+# LaTeX settings
+rc("text", usetex=True)
+rc("font", size=13)
+
 
 def construct_finite_voronoi_regions(vor, radius=10):
     """Construct finite Voronoi regions by closing unbounded ones."""
@@ -79,7 +85,11 @@ regions, vertices = construct_finite_voronoi_regions(vor)
 
 # Set up plot
 fig, ax = plt.subplots(figsize=(8, 8))
-colors = plt.cm.Set3(np.linspace(0, 1, len(V)))
+from matplotlib.colors import hsv_to_rgb
+hues = np.linspace(0, 1, len(V), endpoint=False)  # evenly spaced hues
+saturation = 1.0
+value = 1.0
+colors = hsv_to_rgb(np.stack([hues, np.full(len(V), saturation), np.full(len(V), value)], axis=1))
 patches = []
 region_colors = []
 
@@ -98,7 +108,7 @@ for i, region in enumerate(regions):
 
 # Plot Voronoi cells
 if patches:
-    collection = PatchCollection(patches, facecolor=region_colors, alpha=0.5, edgecolor='k', linewidth=0.5)
+    collection = PatchCollection(patches, facecolor=region_colors, edgecolor='k', linewidth=0.5)
     ax.add_collection(collection)
 
 # Plot convex hull
@@ -106,17 +116,28 @@ ax.plot(*V[[*range(len(V)), 0]].T, 'k', lw=1)
 
 # Plot convex hull vertices
 ax.scatter(V[:, 0], V[:, 1], facecolors='none', edgecolors='black', s=80, linewidths=1.5)
+offset_scale = 0.05  # tweak for spacing
+centroid_V = V.mean(axis=0)
+
 for i, v in enumerate(V):
-    ax.text(v[0] + 0.01, v[1] + 0.01, f'$v_{{{i+1}}}$', fontsize=13)
+    direction = v - centroid_V
+    if np.linalg.norm(direction) > 0:
+        normal = direction / np.linalg.norm(direction)
+    else:
+        normal = np.array([1.0, 0.0])  # fallback
+    offset = offset_scale * normal
+    label_pos = v + offset
+
+    ax.text(label_pos[0], label_pos[1], f"$v_{{{i+1}}}$", fontsize=13,
+            ha='center', va='center')
 
 # Plot origin
 plt.scatter(0, 0, color='black', marker='x', s=80, linewidths=2)
 plt.text(0.02, 0.02, "$0$", color='black', fontsize=13)
 
-ax.set_title("Voronoi Cells of Convex Hull Vertices (Clipped to Hull)")
 ax.set_aspect('equal')
 ax.axis('off')
 script_dir = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(script_dir, "voronoi_{}.png".format(k))
-plt.savefig(filename, dpi=500)
+filename = os.path.join(script_dir, "voronoi_{}.pdf".format(k))
+plt.savefig(filename, bbox_inches='tight', format='pdf')
 plt.show()
