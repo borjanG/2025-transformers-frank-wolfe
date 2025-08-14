@@ -3,6 +3,12 @@
   Attention's forward pass and Frank-Wolfe
 </h1>
 
+<p align="center">
+  <a href="https://arxiv.org/abs/2508.09628">
+  <img src="https://zenodo.org/badge/DOI/arxiv.org/abs/2508.09628.svg">
+  </a>
+</p>
+
 <tt>Python</tt> codes for the paper 
 **Attention's forward pass and Frank-Wolfe** by Albert Alcalde, Borjan Geshkovski and Domènec Ruiz-Balet. 
 
@@ -20,6 +26,12 @@
 ## Citing
 
 ```bibtex
-@article{
+@article{alcalde2025attention,
+      title={Attention's forward pass and Frank-Wolfe}, 
+      author={Albert Alcalde and Borjan Geshkovski and Domènec Ruiz-Balet},
+      year={2025},
+      eprint={2508.09628},
+      archivePrefix={arXiv},
+      primaryClass={math.OC}
 }
 ```
